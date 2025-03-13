@@ -71,7 +71,9 @@ class SseServerTransport:
     _endpoint: str
     _read_stream_writers: dict[UUID, ReadStreamWriter]
 
-    def __init__(self, endpoint: str) -> None:
+    # ALBERT
+    # def __init__(self, endpoint: str) -> None:
+    def __init__(self, endpoint: str, host_port: int=-1) -> None:
         """
         Creates a new SSE server transport, which will direct the client to POST
         messages to the relative or absolute URL given.
@@ -79,6 +81,8 @@ class SseServerTransport:
 
         super().__init__()
         self._endpoint = endpoint
+        # ALBERT
+        self._host_port = host_port
         self._read_stream_writers = {}
         logger.debug(f"SseServerTransport initialized with endpoint: {endpoint}")
 
@@ -99,7 +103,12 @@ class SseServerTransport:
         write_stream, write_stream_reader = anyio.create_memory_object_stream(0)
 
         session_id = uuid4()
-        session_uri = f"{quote(self._endpoint)}?session_id={session_id.hex}"
+        #ALBERT
+        # session_uri = f"{quote(self._endpoint)}?session_id={session_id.hex}"
+        if self._host_port != -1:
+            session_uri = f"{quote(self._endpoint)}?session_id={session_id.hex}&host_port={self._host_port}"
+        else:
+            session_uri = f"{quote(self._endpoint)}?session_id={session_id.hex}"
         self._read_stream_writers[session_id] = read_stream_writer
         logger.debug(f"Created new session with ID: {session_id}")
 
